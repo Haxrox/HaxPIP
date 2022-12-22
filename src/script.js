@@ -15,7 +15,7 @@
 function findLargestPlayingVideo() {
   const videos = Array.from(document.querySelectorAll('video'))
     .filter(video => video.readyState != 0)
-    .filter(video => video.disablePictureInPicture == false)
+    .filter(video => { video.disablePictureInPicture = false; return video.disablePictureInPicture == false })
     .sort((v1, v2) => {
       const v1Rect = v1.getClientRects()[0]||{width:0,height:0};
       const v2Rect = v2.getClientRects()[0]||{width:0,height:0};
@@ -30,12 +30,15 @@ function findLargestPlayingVideo() {
 }
 
 async function requestPictureInPicture(video) {
-  await video.requestPictureInPicture();
-  video.setAttribute('__pip__', true);
-  video.addEventListener('leavepictureinpicture', event => {
-    video.removeAttribute('__pip__');
-  }, { once: true });
-  new ResizeObserver(maybeUpdatePictureInPictureVideo).observe(video);
+  video.requestPictureInPicture().then((pipWindow) => {
+    console.log("HaxPIP");
+    console.log(pipWindow);
+    video.setAttribute('__pip__', true);
+    video.addEventListener('leavepictureinpicture', event => {
+      video.removeAttribute('__pip__');
+    }, { once: true });
+    new ResizeObserver(maybeUpdatePictureInPictureVideo).observe(video);
+  });
 }
 
 function maybeUpdatePictureInPictureVideo(entries, observer) {
