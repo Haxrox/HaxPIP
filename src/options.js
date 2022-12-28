@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-chrome.storage.sync.get({ optOutAnalytics: false }, results => {
-  const optOutAnalyticsCheckbox = document.querySelector('#optOutAnalytics');
+chrome.storage.sync.get({ forcePIP: false }, results => {
+  const forcePIPCheckbox = document.querySelector('#forcePIP');
 
-  optOutAnalyticsCheckbox.checked = results.optOutAnalytics;
-  optOutAnalyticsCheckbox.onchange = _ => {
+  forcePIPCheckbox.checked = results.forcePIP;
+  forcePIPCheckbox.onchange = _ => {
     chrome.storage.sync.set({
-      optOutAnalytics: optOutAnalyticsCheckbox.checked
+      forcePIP: forcePIPCheckbox.checked
     }, _ => {
       // Reload extension to make opt-out change immediate. 
-      chrome.runtime.reload();
+      // chrome.runtime.reload();
       window.close();
     });
   };

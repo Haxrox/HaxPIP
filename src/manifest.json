@@ -1,17 +1,17 @@
 {
-  "name": "Picture-in-Picture Extension (by Google)",
-  "description": "Watch video using Picture-in-Picture",
-  "version": "1.11",
+  "name": "HaxPIP",
+  "description": "Watch video using Picture-in-Picture Extension (by Google)",
+  "version": "1.12",
   "icons": {
-    "128": "assets/icon128.png"
+    "128": "assets/icon-coloured.png"
   },
   "background": {
     "service_worker": "background.js"
   },
   "action": {
     "default_icon": {
-      "19": "assets/icon19.png",
-      "38": "assets/icon38.png"
+      "19": "assets/icon-coloured.png",
+      "38": "assets/icon-coloured.png"
     }
   },
   "commands": {
@@ -30,7 +30,8 @@
   },
   "permissions": [
     "scripting",
-    "storage"
+    "storage",
+    "nativeMessaging"
   ],
   "host_permissions": [
     "<all_urls>"
