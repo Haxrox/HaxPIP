@@ -12,10 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
+var forcePIP = true;
+
 function findLargestPlayingVideo() {
   const videos = Array.from(document.querySelectorAll('video'))
     .filter(video => video.readyState != 0)
-    .filter(video => { video.disablePictureInPicture = false; return video.disablePictureInPicture == false })
+    .filter(video => {
+      if (video._disablePictureInPicture === undefined) {
+        video._disablePictureInPicture = video.disablePictureInPicture;
+      }
+      video.disablePictureInPicture = forcePIP ? false : video._disablePictureInPicture;
+      return video.disablePictureInPicture === false;
+    })
     .sort((v1, v2) => {
       const v1Rect = v1.getClientRects()[0]||{width:0,height:0};
       const v2Rect = v2.getClientRects()[0]||{width:0,height:0};
@@ -31,8 +40,6 @@ function findLargestPlayingVideo() {
 
 async function requestPictureInPicture(video) {
   video.requestPictureInPicture().then((pipWindow) => {
-    console.log("HaxPIP");
-    console.log(pipWindow);
     video.setAttribute('__pip__', true);
     video.addEventListener('leavepictureinpicture', event => {
       video.removeAttribute('__pip__');
@@ -55,6 +62,9 @@ function maybeUpdatePictureInPictureVideo(entries, observer) {
 }
 
 (async () => {
+  const results = await chrome.storage.sync.get({ forcePIP: false });
+  forcePIP = results.forcePIP;
+
   const video = findLargestPlayingVideo();
   if (!video) {
     return;
@@ -63,10 +73,6 @@ function maybeUpdatePictureInPictureVideo(entries, observer) {
     document.exitPictureInPicture();
     return;
   }
-  await requestPictureInPicture(video);
-  _gaq.push(['_trackPageview', '/']);
-})();
 
-var _gaq = _gaq || [];
-_gaq.push(['_setAccount', 'UA-134864766-1']);
-_gaq.push(['_setDetectTitle', false]);
+  await requestPictureInPicture(video);
+})();
