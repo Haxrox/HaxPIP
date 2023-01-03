@@ -13,15 +13,14 @@
 // limitations under the License.
 
 chrome.action.onClicked.addListener((tab) => {
-    const files = ["script.js"];
-    chrome.scripting.executeScript({
-        target: { tabId: tab.id, allFrames: true },
-        // world: "MAIN",
-        files,
-    })
-    //     .then(() => {
-    //     chrome.storage.sync.get({ forcePIP: false }, results => {
-    //         chrome.tabs.sendMessage(tab.id, { forcePIP: results.forcePIP });
-    //     });
-    // });
+    chrome.storage.sync.get({ optOutAnalytics: false }, (results) => {
+        const files = results.optOutAnalytics
+            ? ["script.js"]
+            : ["script.js", "ga.js"];
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id, allFrames: true },
+            // world: "MAIN",
+            files,
+        });
+    });
 });
