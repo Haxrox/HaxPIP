@@ -12,16 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+var prevTabId = -1;
+
+function sendMessage(tabId, messageType, ...args) {
+    console.log("sendMessage: " + tabId + " | " + messageType);
+    chrome.tabs.sendMessage(tabId, { type: messageType, args: args }).catch((err) => {
+        if (err.message.includes("Could not establish connection. Receiving end does not exist.")) {
+            addScript(tabId).then(() => {
+                // setTimeout(sendMessage, 500, tabId, messageType, args);
+            }).catch((err) => {
+                console.error(err);
+            });
+        }
+        console.error(err);
+    });
+}
+
+function addScript(tabId) {
+    console.log("addScript: " + tabId);
+    return chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ["script.js"],
+    });
+}
+
 chrome.action.onClicked.addListener((tab) => {
-    const files = ["script.js"];
-    chrome.scripting.executeScript({
-        target: { tabId: tab.id, allFrames: true },
-        // world: "MAIN",
-        files,
-    })
-    //     .then(() => {
-    //     chrome.storage.sync.get({ forcePIP: false }, results => {
-    //         chrome.tabs.sendMessage(tab.id, { forcePIP: results.forcePIP });
-    //     });
-    // });
+    sendMessage(prevTabId, "togglePIP");
+});
+
+chrome.tabs.onActivated.addListener((activeInfo) => {
+    if (prevTabId != -1) {
+        sendMessage(prevTabId, "enablePIP");
+    }
+
+    sendMessage(activeInfo.tabId, "disablePIP");
+    prevTabId = activeInfo.tabId;
+}); 
+
+chrome.tabs.onCreated.addListener(addScript);
+chrome.tabs.onRemoved.addListener((tabId, _) => {
+    prevTabId == tabId ? -1 : prevTabId;
 });
